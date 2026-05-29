@@ -1,5 +1,9 @@
 
 
+## 0.3.0
+
+- Switch to `src` layout
+
 
 ## 0.2.0
 
