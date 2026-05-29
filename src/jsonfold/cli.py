@@ -1,7 +1,7 @@
 import argparse
 import json
 
-from jsonfold.fold import _DEFAULT_MAX_WIDTH, dumps, fold_iter
+from jsonfold.fold import MAX_WIDTH_DEFAULT, dumps, fold_iter
 
 
 def main():
@@ -26,8 +26,8 @@ def main():
         "-w",
         "--max-width",
         type=int,
-        default=_DEFAULT_MAX_WIDTH,
-        help=f"Maximum width for folded lines (default: {_DEFAULT_MAX_WIDTH})",
+        default=MAX_WIDTH_DEFAULT,
+        help=f"Maximum width for folded lines (default: {MAX_WIDTH_DEFAULT})",
     )
 
     args = cli.parse_args()

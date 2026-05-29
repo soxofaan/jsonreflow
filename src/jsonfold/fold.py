@@ -1,11 +1,11 @@
 import json
 from typing import Iterable, Iterator, List
 
-_DEFAULT_MAX_WIDTH = 80
+MAX_WIDTH_DEFAULT = 80
 
 
 def fold_iter(
-    lines: Iterable[str], max_width: int = _DEFAULT_MAX_WIDTH
+    lines: Iterable[str], max_width: int = MAX_WIDTH_DEFAULT
 ) -> Iterator[str]:
     # Stack of buffers of possibly foldable levels.
     # Note that only the currently deepest levels are tracked,
@@ -51,9 +51,9 @@ def fold_iter(
                         yield folded
 
 
-def fold(encoded: str, max_width: int = _DEFAULT_MAX_WIDTH) -> str:
+def fold(encoded: str, max_width: int = MAX_WIDTH_DEFAULT) -> str:
     return "\n".join(fold_iter(encoded.split("\n"), max_width=max_width))
 
 
-def dumps(obj, max_width: int = _DEFAULT_MAX_WIDTH) -> str:
+def dumps(obj, max_width: int = MAX_WIDTH_DEFAULT) -> str:
     return fold(json.dumps(obj=obj, indent=2), max_width=max_width)
