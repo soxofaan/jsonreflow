@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "jsonfold"
-version = "0.3.0"
+dynamic = ["version"]
 description = "Indented JSON, but with folded whitespace to have more data on a single line."
 readme = "README.md"
 requires-python = ">= 3.8"
@@ -47,6 +47,9 @@ include = [
   "src/",
   "tests/",
 ]
+
+[tool.hatch.version]
+path = "src/jsonfold/__init__.py"
 
 
 [tool.ruff.lint]
