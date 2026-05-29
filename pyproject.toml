@@ -26,6 +26,7 @@ classifiers = [
 
 [project.urls]
 Repository = "https://github.com/soxofaan/jsonfold"
+Changelog = "https://github.com/soxofaan/jsonfold/blob/main/CHANGELOG.md"
 
 
 [project.optional-dependencies]
