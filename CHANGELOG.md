@@ -4,6 +4,9 @@
 
 ## WIP
 
+
+## 0.5.0
+
 - Expand README
 - Add CLI argument `-i`/`--indent` to specify indentation level ([#3](https://github.com/soxofaan/jsonreflow/issues/3))
 
