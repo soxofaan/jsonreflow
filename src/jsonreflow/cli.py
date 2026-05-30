@@ -1,11 +1,11 @@
 import argparse
 import json
 
-from jsonfold.fold import MAX_WIDTH_DEFAULT, dumps, fold_iter
+from jsonreflow.reflow import MAX_WIDTH_DEFAULT, dumps, reflow_iter
 
 
 def main():
-    cli = argparse.ArgumentParser(description="Fold JSON to fit within a given width")
+    cli = argparse.ArgumentParser(description="Reflow JSON to fit within a given width")
     cli.add_argument(
         "input",
         nargs="?",
@@ -18,7 +18,7 @@ def main():
         action="store_true",
         help="""
             Assume the input is already properly formatted as multiline, indented JSON.
-            Allows to fold without parsing the JSON, which is more efficient,
+            Allows to reflow without parsing the JSON, which is more efficient,
             and avoids subtle re-encoding issues.
         """,
     )
@@ -27,12 +27,12 @@ def main():
         "--max-width",
         type=int,
         default=MAX_WIDTH_DEFAULT,
-        help=f"Maximum width for folded lines (default: {MAX_WIDTH_DEFAULT})",
+        help=f"Maximum line width to reflow for (default: {MAX_WIDTH_DEFAULT})",
     )
 
     args = cli.parse_args()
     if args.assume_formatted:
-        for line in fold_iter(
+        for line in reflow_iter(
             (s.rstrip() for s in args.input.readlines()), max_width=args.max_width
         ):
             print(line)

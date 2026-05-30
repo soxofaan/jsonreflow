@@ -4,7 +4,7 @@ from typing import Iterable, Iterator, List
 MAX_WIDTH_DEFAULT = 80
 
 
-def fold_iter(
+def reflow_iter(
     lines: Iterable[str], max_width: int = MAX_WIDTH_DEFAULT
 ) -> Iterator[str]:
     # Stack of buffers of possibly foldable levels.
@@ -51,9 +51,9 @@ def fold_iter(
                         yield folded
 
 
-def fold(encoded: str, max_width: int = MAX_WIDTH_DEFAULT) -> str:
-    return "\n".join(fold_iter(encoded.split("\n"), max_width=max_width))
+def reflow(encoded: str, max_width: int = MAX_WIDTH_DEFAULT) -> str:
+    return "\n".join(reflow_iter(encoded.split("\n"), max_width=max_width))
 
 
 def dumps(obj, max_width: int = MAX_WIDTH_DEFAULT) -> str:
-    return fold(json.dumps(obj=obj, indent=2), max_width=max_width)
+    return reflow(json.dumps(obj=obj, indent=2), max_width=max_width)

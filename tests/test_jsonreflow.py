@@ -4,7 +4,7 @@ from typing import Iterable, List
 
 import pytest
 
-from jsonfold import dumps, fold_iter
+from jsonreflow import dumps, reflow_iter
 
 
 def test_dumps_none():
@@ -360,7 +360,7 @@ def test_tracking_iterator_basic():
     assert iterator.new_consumed() == []
 
 
-def test_fold_iter_flushing_simple_one_line():
+def test_reflow_iter_flushing_simple_one_line():
     """
     Trivial case: everything fits on one line,
     so we should consume all input lines immediately.
@@ -368,7 +368,7 @@ def test_fold_iter_flushing_simple_one_line():
     data = {"color": "green", "shape": "square"}
     input_lines = TrackingIterator(json.dumps(data, indent=2).split("\n"))
 
-    folded = fold_iter(input_lines, max_width=80)
+    folded = reflow_iter(input_lines, max_width=80)
     assert input_lines.consumed == []
 
     line = next(folded)
@@ -381,7 +381,7 @@ def test_fold_iter_flushing_simple_one_line():
     ]
 
 
-def test_fold_iter_flushing_simple_multiline():
+def test_reflow_iter_flushing_simple_multiline():
     """
     Multi-line result, but just one level,
     so all lines should be consumed immediately.
@@ -389,7 +389,7 @@ def test_fold_iter_flushing_simple_multiline():
     data = {"color": "green", "shape": "square"}
     input_lines = TrackingIterator(json.dumps(data, indent=2).split("\n"))
 
-    folded = fold_iter(input_lines, max_width=20)
+    folded = reflow_iter(input_lines, max_width=20)
     assert input_lines.new_consumed() == []
 
     assert next(folded) == "{"
@@ -413,12 +413,12 @@ def test_fold_iter_flushing_simple_multiline():
         _ = next(folded)
 
 
-def test_fold_iter_flushing_nested():
+def test_reflow_iter_flushing_nested():
     """Multi-line result with nesting: input is consumed in chunks."""
     data = {"three": list(range(3)), "five": list(range(5)), "ten": list(range(10))}
     input_lines = TrackingIterator(json.dumps(data, indent=2).split("\n"))
 
-    folded = fold_iter(input_lines, max_width=25)
+    folded = reflow_iter(input_lines, max_width=25)
     assert input_lines.new_consumed() == []
 
     # Top level flush: while "three" would fit on one line, "five" would overflow.

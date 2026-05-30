@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 
 [project]
-name = "jsonfold"
+name = "jsonreflow"
 dynamic = ["version"]
-description = "Indented JSON, but with folded whitespace to have more data on a single line."
+description = "Indented JSON, but with one-line arrays or objects if they fit a desired line length."
 readme = "README.md"
 requires-python = ">= 3.8"
 authors = [
@@ -25,8 +25,8 @@ classifiers = [
 
 
 [project.urls]
-Repository = "https://github.com/soxofaan/jsonfold"
-Changelog = "https://github.com/soxofaan/jsonfold/blob/main/CHANGELOG.md"
+Repository = "https://github.com/soxofaan/jsonreflow"
+Changelog = "https://github.com/soxofaan/jsonreflow/blob/main/CHANGELOG.md"
 
 
 [project.optional-dependencies]
@@ -36,12 +36,12 @@ dev = [
 
 
 [project.scripts]
-jsonfold = "jsonfold.cli:main"
+jsonreflow = "jsonreflow.cli:main"
 
 
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/jsonfold"]
+packages = ["src/jsonreflow"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -50,7 +50,7 @@ include = [
 ]
 
 [tool.hatch.version]
-path = "src/jsonfold/__init__.py"
+path = "src/jsonreflow/__init__.py"
 
 
 [tool.ruff.lint]
