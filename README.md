@@ -31,11 +31,15 @@ Standard JSON serialization tools typically only provide two approaches:
 
 Consider the following example of a (Geo)JSON document.
 
+### Compact
+
 In compact form, you have one line, 83 characters in total, no whitespace:
 
 ```json
 {"type":"Polygon","coordinates":[[[11.4,46.5],[10.3,55.3],[1.1,49.9],[11.4,46.5]]]}
 ```
+
+### "Pretty"
 
 In the so-called "pretty" form, using 2 space indentation (a common choice),
 you have 23 lines, 233 characters, of which more than half are the spaces for indentation:
@@ -66,6 +70,8 @@ you have 23 lines, 233 characters, of which more than half are the spaces for in
 }
 ```
 
+
+### JSON Reflow
 
 JSON Reflow allows one to find a better compromise:
 only serialize arrays or objects over multiple lines
@@ -168,15 +174,38 @@ cat data.json | jsonreflow
 This will reflow the JSON document with the default settings of
 an 80 characters line length limit and 2 spaces indentation.
 
+Line length limit and indentation can be customized:
+
+```bash
+jsonreflow --max-width 40 --indent 4 data.json
+```
+
+### "Assume formatted" mode
+
+By default, JSON Reflow parses the input JSON en re-encodes it before reflowing,
+to ensure that proper indentation is present for the reflowing logic to work correctly.
+If you have data that is already properly JSON formatted with consistent indentation,
+you can use the `--assume-formatted` option to skip the parsing and re-encoding step,
+and directly reflow the input as-is.
+
+This has some advantages:
+- no effort is spent on parsing and re-encoding
+- original data encoding and formatting is preserved:
+  this avoids subtle data manipulation
+  introduced by the parsing and re-encoding roundtrip
+  (e.g. loss of decimal places in floats, or handling of unicode data)
+- the document can be reflowed in a streaming fashion,
+  line per line, without need to keep the entire document in memory.
+
+
 
 ## Design and implementation
 
 - No required dependencies outside of the Python standard library
 - The core reflow logic only manipulates whitespace,
   there is no requirement to parse the JSON and re-serialize it,
-  which allows to preserve the original formatting
-  and avoids subtle data changes
-  due to how different JSON libraries serialize the same data.
+  which allows to preserve the original encoding
+  and avoids subtle data manipulation that can be introduced by parsing and re-encoding
 - The core reflow logic works in a streaming fashion
   (iterable input, generator output),
   so large JSON documents can be reflowed

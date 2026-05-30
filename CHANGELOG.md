@@ -2,6 +2,12 @@
 # Changelog
 
 
+## WIP
+
+- Expand README
+- Add CLI argument `-i`/`--indent` to specify indentation level ([#3](https://github.com/soxofaan/jsonreflow/issues/3))
+
+
 ## 0.4.0
 
 - Rename project to `jsonreflow` ([#1](https://github.com/soxofaan/jsonfold/issues/1))
