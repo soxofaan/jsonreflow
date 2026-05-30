@@ -1,14 +1,21 @@
 
 # JSON Reflow
 
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jsonreflow)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/jsonreflow)
+![PyPI - Version](https://img.shields.io/pypi/v/jsonreflow)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/soxofaan/jsonreflow/unittests.yml)
+![PyPI - License](https://img.shields.io/pypi/l/jsonreflow)
+
+
 Python library and CLI tool to reflow JSON files and streams,
 to allow a better compromise between
 
-- compactness:
+- **compactness**:
   try to fit short arrays and objects on a single line,
   within a given line length limit
-- human readability:
-  indented JSON for larger constructs otherwise.
+- human **readability**:
+  multilevel indentation for larger constructs otherwise.
 
 
 
@@ -16,15 +23,19 @@ to allow a better compromise between
 
 Standard JSON serialization tools typically only provide two approaches:
 
-- put everything on a single line:
+- put everything on a **single line**:
   the most compact, but very poor for human readability
 
 - spread out each and every array item and object property on its own line
   with appropriate indentation to visualize the structure.
   This is easier for humans to parse visually
-  (which is why it is often referred to as "prettifying" or "beautifying"),
-  but for larger documents, this easily becomes unwieldy, "too vertical"
+  (which is why it is often referred to as "*prettifying*" or "*beautifying*"),
+  but for larger documents, this easily becomes unwieldy, "**too vertical**"
   and very space-inefficient because of all the repeated indentation.
+
+
+If you want a solution in between,
+JSON Reflow can help you.
 
 
 ## Example
@@ -74,7 +85,7 @@ you have 23 lines, 233 characters, of which more than half are the spaces for in
 ### JSON Reflow
 
 JSON Reflow allows one to find a better compromise:
-only serialize arrays or objects over multiple lines
+only spread out arrays or objects over multiple lines
 if the single-line approach would exceed a given line length.
 
 With the default settings (e.g. 80 characters line length limit, 2 spaces indentation),
@@ -111,8 +122,8 @@ resulting in 11 lines, 137 characters in total, and 38 spaces for indentation:
 
 ### In a virtual environment
 
-JSON reflow is a Python package and can be installed from PyPI using pip
-(or something compatible like uv) into your Python environment:
+JSON Reflow is a Python package and can be installed from [PyPI](https://pypi.org/project/jsonreflow/)
+using pip (or something compatible like uv) into your Python environment:
 
 ```bash
 pip install jsonreflow
@@ -160,6 +171,8 @@ under the `--help` option:
 jsonreflow --help
 ```
 
+### Basics
+
 The most basic usage is just passing a JSON file path,
 or reading from standard input if no file path is given:
 
@@ -182,31 +195,38 @@ jsonreflow --max-width 40 --indent 4 data.json
 
 ### "Assume formatted" mode
 
-By default, JSON Reflow parses the input JSON en re-encodes it before reflowing,
+By default, JSON Reflow parses the input JSON and re-encodes it before reflowing,
 to ensure that proper indentation is present for the reflowing logic to work correctly.
 If you have data that is already properly JSON formatted with consistent indentation,
 you can use the `--assume-formatted` option to skip the parsing and re-encoding step,
 and directly reflow the input as-is.
 
 This has some advantages:
-- no effort is spent on parsing and re-encoding
-- original data encoding and formatting is preserved:
-  this avoids subtle data manipulation
-  introduced by the parsing and re-encoding roundtrip
-  (e.g. loss of decimal places in floats, or handling of unicode data)
-- the document can be reflowed in a streaming fashion,
+- **no effort** is spent on parsing and re-encoding
+- **original data encoding is preserved**.
+  This avoids subtle, undesired data manipulation
+  introduced by the roundtrip of parsing and re-encoding
+  (e.g. loss of decimal places in floats, or handling of unicode data).
+- The document can be reflowed in a **streaming fashion**,
   line per line, without need to keep the entire document in memory.
+
+
+> [!NOTE]
+> This operation mode of JSON Reflow can also be used
+> on data that is not (fully) valid JSON,
+> but close enough in terms of structure and indentation.
+> To be used at one's own risk of course.
 
 
 
 ## Design and implementation
 
-- No required dependencies outside of the Python standard library
-- The core reflow logic only manipulates whitespace,
+- **No required dependencies** outside of the Python standard library
+- The core reflow logic **only manipulates whitespace**,
   there is no requirement to parse the JSON and re-serialize it,
   which allows to preserve the original encoding
   and avoids subtle data manipulation that can be introduced by parsing and re-encoding
-- The core reflow logic works in a streaming fashion
+- The core reflow logic works in a **streaming** fashion
   (iterable input, generator output),
   so large JSON documents can be reflowed
   without loading the entire document into memory.
