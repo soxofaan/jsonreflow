@@ -2,10 +2,13 @@ import json
 from typing import Iterable, Iterator, List
 
 MAX_WIDTH_DEFAULT = 80
+INDENT_DEFAULT = 2
 
 
 def reflow_iter(
-    lines: Iterable[str], max_width: int = MAX_WIDTH_DEFAULT
+    lines: Iterable[str],
+    *,
+    max_width: int = MAX_WIDTH_DEFAULT,
 ) -> Iterator[str]:
     # Stack of buffers of possibly foldable levels.
     # Note that only the currently deepest levels are tracked,
@@ -51,9 +54,22 @@ def reflow_iter(
                         yield folded
 
 
-def reflow(encoded: str, max_width: int = MAX_WIDTH_DEFAULT) -> str:
-    return "\n".join(reflow_iter(encoded.split("\n"), max_width=max_width))
+def reflow(encoded: str, *, max_width: int = MAX_WIDTH_DEFAULT) -> str:
+    return "\n".join(
+        reflow_iter(
+            lines=encoded.split("\n"),
+            max_width=max_width,
+        )
+    )
 
 
-def dumps(obj, max_width: int = MAX_WIDTH_DEFAULT) -> str:
-    return reflow(json.dumps(obj=obj, indent=2), max_width=max_width)
+def dumps(
+    obj,
+    *,
+    max_width: int = MAX_WIDTH_DEFAULT,
+    indent: int = INDENT_DEFAULT,
+) -> str:
+    return reflow(
+        encoded=json.dumps(obj=obj, indent=indent),
+        max_width=max_width,
+    )
