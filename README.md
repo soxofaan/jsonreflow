@@ -218,6 +218,18 @@ This has some advantages:
 > To be used at one's own risk of course.
 
 
+### In-place file modification
+
+Because of how redirection works in most shells,
+naively trying to reflow a file in-place
+with something like `jsonreflow data.json > data.json` will not work
+(the redirection will truncate the input file before `jsonreflow` can read it).
+Instead, use the `--inplace` option:
+
+```bash
+jsonreflow --inplace data.json
+```
+
 
 ## Design and implementation
 
