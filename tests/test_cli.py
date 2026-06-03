@@ -88,6 +88,7 @@ def test_invalid_json():
     result = run_jsonreflow(stdin=stdin, check_success=False)
     assert result.returncode != 0
     # TODO: check for cleaner error message #4
+    assert "JSONDecodeError" in result.stderr
 
 
 @pytest.mark.parametrize(
@@ -115,3 +116,85 @@ def test_assume_formatted(max_width, expected):
     args = ["--assume-formatted", "-w", str(max_width)]
     result = run_jsonreflow(stdin=stdin, args=args)
     assert result.stdout == expected
+
+
+@pytest.mark.parametrize(
+    ["args", "expected"],
+    [
+        ([], '{"a": 123, "b": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}\n'),
+        (
+            ["-w20", "-i2"],
+            '{\n  "a": 123,\n  "b": [\n    0,\n    1,\n    2,\n    3,\n    4,\n    5,\n'
+            "    6,\n    7,\n    8,\n    9\n  ]\n}\n",
+        ),
+    ],
+)
+def test_inplace_basic(tmp_path: Path, args, expected):
+    path = tmp_path / "data.json"
+    path.write_text('{"a":123, "b":[0,1,2,3,4,5,6,7,8,9]}')
+    result = run_jsonreflow(args=args + ["--inplace", str(path)])
+    assert result.stdout == ""
+    assert path.read_text() == expected
+
+
+def test_inplace_stdin(tmp_path: Path):
+    """in-place mode on stdin doesn't make sense"""
+    result = run_jsonreflow(
+        args=["--inplace"],
+        stdin='{"a":1, "b":[1,2,3]}',
+        check_success=False,
+    )
+    assert result.returncode != 0
+    assert result.stdout == ""
+    assert "In-place modifying standard input does not make sense" in result.stderr
+
+
+@pytest.mark.parametrize(
+    ["max_width", "expected"],
+    [
+        (80, '{"a": 123 + stuff, "b": [look ma, no quotes]}\n'),
+        (40, '{\n  "a": 123 + stuff,\n  "b": [look ma, no quotes]\n}\n'),
+    ],
+)
+def test_inplace_and_assume_formatted(tmp_path: Path, max_width, expected):
+    path = tmp_path / "data.json"
+    path.write_text(
+        textwrap.dedent("""\
+        {
+          "a": 123 + stuff,
+          "b": [
+            look ma,
+            no quotes
+          ]
+        }""")
+    )
+
+    args = ["--inplace", "--assume-formatted", f"-w{max_width}", str(path)]
+    result = run_jsonreflow(args=args)
+    assert result.stdout == ""
+    assert path.read_text() == expected
+
+
+def test_inplace_nonexistent_file(tmp_path: Path):
+    """in-place mode with a non-existent file should error and not create the file"""
+    path = tmp_path / "nonexistent.json"
+    result = run_jsonreflow(args=["--inplace", str(path)], check_success=False)
+    assert result.returncode != 0
+    assert result.stdout == ""
+    # TODO: check for cleaner error message #4
+    assert "nonexistent.json is not a file" in result.stderr
+
+    assert path.exists() is False
+
+
+def test_inplace_invalid_json(tmp_path: Path):
+    """in-place mode with invalid JSON should error and not touch the file"""
+    path = tmp_path / "data.json"
+    path.write_text("nope, no JSON here")
+    result = run_jsonreflow(args=["--inplace", str(path)], check_success=False)
+    assert result.returncode != 0
+    assert result.stdout == ""
+    # TODO: check for cleaner error message #4
+    assert "JSONDecodeError" in result.stderr
+
+    assert path.read_text() == "nope, no JSON here"
