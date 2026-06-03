@@ -4,6 +4,8 @@
 
 ## WIP
 
+- Add `jsonreflow.dump(obj, fp)` ([#7](https://github.com/soxofaan/jsonreflow/issues/7))
+
 
 ## 0.5.0 - 2026-05-30
 

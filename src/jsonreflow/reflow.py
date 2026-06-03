@@ -10,6 +10,12 @@ def reflow_iter(
     *,
     max_width: int = MAX_WIDTH_DEFAULT,
 ) -> Iterator[str]:
+    """
+    Reflow an iterable of lines of JSON-encoded text to fit within a given line width.
+    """
+    # TODO: clarify that the given lines are expected to not have trailing newlines
+    # TODO: be flexible/configurable about lines having newlines or not
+
     # Stack of buffers of possibly foldable levels.
     # Note that only the currently deepest levels are tracked,
     # levels more towards the top that are already collapsed
@@ -69,7 +75,52 @@ def dumps(
     max_width: int = MAX_WIDTH_DEFAULT,
     indent: int = INDENT_DEFAULT,
 ) -> str:
+    """
+    Serialize `obj` to a JSON-formatted string,
+    like `json.dumps` from the standard library,
+    but with reflowing to fit within a given line width.
+    """
+    # TODO: support all/most of the original json.dumps arguments?
     return reflow(
         encoded=json.dumps(obj=obj, indent=indent),
         max_width=max_width,
     )
+
+
+def _chunks_to_lines(chunks: Iterable[str]) -> Iterator[str]:
+    """
+    Convert an iterable of JSON-encoded chunks
+    into an iterator of lines (without trailing newlines).
+    """
+    buffer = ""
+    for chunk in chunks:
+        parts = chunk.split("\n")
+        for part in parts[:-1]:
+            yield buffer + part
+            buffer = ""
+        buffer += parts[-1]
+
+    if buffer:
+        yield buffer
+
+
+def dump(
+    obj,
+    fp,
+    *,
+    max_width: int = MAX_WIDTH_DEFAULT,
+    indent: int = INDENT_DEFAULT,
+) -> None:
+    """
+    Serialize `obj` as a JSON-formatted stream to `fp`
+    (a `.write()`-supporting file-like object),
+    like `json.dump` from the standard library,
+    but with reflowing to fit within a given line width.
+    """
+    # TODO: support all/most of JSONEncoder's arguments?
+    encoder = json.JSONEncoder(indent=indent)
+    chunks = encoder.iterencode(obj)
+    lines = reflow_iter(lines=_chunks_to_lines(chunks), max_width=max_width)
+    for line in lines:
+        # TODO: classic json.dump() does not add newline after last line
+        fp.write(line + "\n")

@@ -4,82 +4,124 @@ from typing import Iterable, List
 
 import pytest
 
-from jsonreflow import dumps, reflow_iter
+from jsonreflow import dump, dumps, reflow_iter
+
+# Simple cases (obj, expected) of scalar values or small structures
+DUMP_CASES_SIMPLE = [
+    (None, "null"),
+    (123, "123"),
+    (-123, "-123"),
+    (123.45, "123.45"),
+    (1e6, "1000000.0"),
+    (1e-3, "0.001"),
+    (1e-6, "1e-06"),
+    (True, "true"),
+    (False, "false"),
+    ("hello dump", '"hello dump"'),
+    ([], "[]"),
+    ([[]], "[[]]"),
+    ([1, 2, 3], "[1, 2, 3]"),
+    ((), "[]"),
+    (((),), "[[]]"),
+    ((1, "two"), '[1, "two"]'),
+    ({}, "{}"),
+    ({1: "one", "two": 2}, '{"1": "one", "two": 2}'),
+]
 
 
-def test_dumps_none():
-    assert dumps(None) == "null"
+@pytest.mark.parametrize(
+    ["obj", "expected"],
+    DUMP_CASES_SIMPLE,
+)
+def test_dumps_basic(obj, expected):
+    assert dumps(obj) == expected
 
 
-def test_dumps_int():
-    assert dumps(123) == "123"
-    assert dumps(-123) == "-123"
+@pytest.mark.parametrize(
+    ["obj", "expected"],
+    DUMP_CASES_SIMPLE,
+)
+def test_dump_basic(tmp_path, obj, expected):
+    path = tmp_path / "result.json"
+    with path.open("w") as f:
+        dump(obj, f)
+    assert path.read_text() == expected + "\n"
 
 
-def test_dumps_float():
-    assert dumps(123.5) == "123.5"
-
-
-def test_dumps_bool():
-    assert dumps(True) == "true"
-    assert dumps(False) == "false"
-
-
-def test_dumps_string():
-    assert dumps("hello world") == '"hello world"'
-
-
-def test_dumps_empty_list():
-    assert dumps([]) == "[]"
-    assert dumps(()) == "[]"
-
-
-def test_dumps_empty_dict():
-    assert dumps({}) == "{}"
-
-
-def test_dumps_flat_list():
-    assert dumps([1, 2, 3, 4, 5]) == "[1, 2, 3, 4, 5]"
-    assert dumps([1, 2, 3, 4, 5], max_width=10) == "[\n  1,\n  2,\n  3,\n  4,\n  5\n]"
-    assert dumps([1, 2, 3, 4, 5], max_width=1) == "[\n  1,\n  2,\n  3,\n  4,\n  5\n]"
-
-
-def test_dumps_flat_dict():
-    assert (
-        dumps({"name": "alice", "color": "green"})
-        == '{"name": "alice", "color": "green"}'
-    )
-    assert (
-        dumps({"name": "alice", "color": "green"}, max_width=10)
-        == '{\n  "name": "alice",\n  "color": "green"\n}'
-    )
-    assert (
-        dumps({"name": "alice", "color": "green"}, max_width=1)
-        == '{\n  "name": "alice",\n  "color": "green"\n}'
-    )
+# Cases (max_width, obj, expected) of basic flat structures
+DUMP_CASES_FLAT_STRUCTURE = [
+    (
+        100,
+        [1, 2, 3, 4, 5],
+        "[1, 2, 3, 4, 5]",
+    ),
+    (
+        10,
+        [1, 2, 3, 4, 5],
+        "[\n  1,\n  2,\n  3,\n  4,\n  5\n]",
+    ),
+    (
+        1,
+        [1, 2, 3, 4, 5],
+        "[\n  1,\n  2,\n  3,\n  4,\n  5\n]",
+    ),
+    (
+        100,
+        {"name": "alice", "color": "green"},
+        '{"name": "alice", "color": "green"}',
+    ),
+    (
+        10,
+        {"name": "alice", "color": "green"},
+        '{\n  "name": "alice",\n  "color": "green"\n}',
+    ),
+    (
+        1,
+        {"name": "alice", "color": "green"},
+        '{\n  "name": "alice",\n  "color": "green"\n}',
+    ),
+]
 
 
 @pytest.mark.parametrize(
     ["max_width", "obj", "expected"],
-    [
-        (
-            80,
-            {"five": list(range(5)), "ten": list(range(10))},
-            '{"five": [0, 1, 2, 3, 4], "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}',
-        ),
-        (
-            40,
-            {"five": list(range(5)), "ten": list(range(10))},
-            """\
+    DUMP_CASES_FLAT_STRUCTURE,
+)
+def test_dumps_flat_structure(max_width, obj, expected):
+    assert dumps(obj, max_width=max_width) == expected
+
+
+@pytest.mark.parametrize(
+    ["max_width", "obj", "expected"],
+    DUMP_CASES_FLAT_STRUCTURE,
+)
+def test_dump_flat_structure(tmp_path, max_width, obj, expected):
+    path = tmp_path / "result.json"
+    with path.open("w") as f:
+        dump(obj, f, max_width=max_width)
+    assert path.read_text() == expected + "\n"
+
+
+# Cases (max_width, obj, expected) of nested structures
+DUMP_CASES_NESTED = [
+    (
+        80,
+        {"five": list(range(5)), "ten": list(range(10))},
+        '{"five": [0, 1, 2, 3, 4], "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}',
+    ),
+    (
+        40,
+        {"five": list(range(5)), "ten": list(range(10))},
+        """\
             {
               "five": [0, 1, 2, 3, 4],
               "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             }""",
-        ),
-        (
-            30,
-            {"five": list(range(5)), "ten": list(range(10))},
-            """\
+    ),
+    (
+        30,
+        {"five": list(range(5)), "ten": list(range(10))},
+        """\
             {
               "five": [0, 1, 2, 3, 4],
               "ten": [
@@ -95,16 +137,16 @@ def test_dumps_flat_dict():
                 9
               ]
             }""",
-        ),
-        (
-            80,
-            {str(x): chr(97 + x) * x for x in range(5)},
-            '{"0": "", "1": "b", "2": "cc", "3": "ddd", "4": "eeee"}',
-        ),
-        (
-            40,
-            {str(x): chr(97 + x) * x for x in range(5)},
-            """\
+    ),
+    (
+        80,
+        {str(x): chr(97 + x) * x for x in range(5)},
+        '{"0": "", "1": "b", "2": "cc", "3": "ddd", "4": "eeee"}',
+    ),
+    (
+        40,
+        {str(x): chr(97 + x) * x for x in range(5)},
+        """\
             {
               "0": "",
               "1": "b",
@@ -112,43 +154,33 @@ def test_dumps_flat_dict():
               "3": "ddd",
               "4": "eeee"
             }""",
-        ),
-    ],
-)
-def test_dumps_listings(max_width, obj, expected):
-    expected = textwrap.dedent(expected)
-    assert dumps(obj, max_width=max_width) == expected
-
-
-@pytest.mark.parametrize(
-    ["max_width", "obj", "expected"],
-    [
-        (
-            80,
-            {
-                "query": "get stuff",
-                "results": {
-                    "count": 5,
-                    "data": [
-                        {"id": 1, "name": "Alice", "payments": None},
-                        {"id": 23, "name": "Bob", "payments": [100, 200]},
-                        {
-                            "id": 3000,
-                            "name": "Carol",
-                            "status": "premium",
-                            "payments": [1000, 3000, 2000, 2, -5],
-                        },
-                        {"id": 44, "name": "Dave", "payments": [1, 5]},
-                        {
-                            "id": 555,
-                            "name": "Eric",
-                            "payments": [44, {"price": 666, "currency": "tulip bulbs"}],
-                        },
-                    ],
-                },
-                "_id": "123kthxbye",
+    ),
+    (
+        80,
+        {
+            "query": "get stuff",
+            "results": {
+                "count": 5,
+                "data": [
+                    {"id": 1, "name": "Alice", "payments": None},
+                    {"id": 23, "name": "Bob", "payments": [100, 200]},
+                    {
+                        "id": 3000,
+                        "name": "Carol",
+                        "status": "premium",
+                        "payments": [1000, 3000, 2000, 2, -5],
+                    },
+                    {"id": 44, "name": "Dave", "payments": [1, 5]},
+                    {
+                        "id": 555,
+                        "name": "Eric",
+                        "payments": [44, {"price": 666, "currency": "tulip bulbs"}],
+                    },
+                ],
             },
-            """\
+            "_id": "123kthxbye",
+        },
+        """\
             {
               "query": "get stuff",
               "results": {
@@ -172,33 +204,33 @@ def test_dumps_listings(max_width, obj, expected):
               },
               "_id": "123kthxbye"
             }""",
-        ),
-        (
-            120,
-            {
-                "query": "get stuff",
-                "results": {
-                    "count": 5,
-                    "data": [
-                        {"id": 1, "name": "Alice", "payments": None},
-                        {"id": 23, "name": "Bob", "payments": [100, 200]},
-                        {
-                            "id": 3000,
-                            "name": "Carol",
-                            "status": "premium",
-                            "payments": [1000, 3000, 2000, 2, -5],
-                        },
-                        {"id": 44, "name": "Dave", "payments": [1, 5]},
-                        {
-                            "id": 555,
-                            "name": "Eric",
-                            "payments": [44, {"price": 666, "currency": "tulip bulbs"}],
-                        },
-                    ],
-                },
-                "_id": "123kthxbye",
+    ),
+    (
+        120,
+        {
+            "query": "get stuff",
+            "results": {
+                "count": 5,
+                "data": [
+                    {"id": 1, "name": "Alice", "payments": None},
+                    {"id": 23, "name": "Bob", "payments": [100, 200]},
+                    {
+                        "id": 3000,
+                        "name": "Carol",
+                        "status": "premium",
+                        "payments": [1000, 3000, 2000, 2, -5],
+                    },
+                    {"id": 44, "name": "Dave", "payments": [1, 5]},
+                    {
+                        "id": 555,
+                        "name": "Eric",
+                        "payments": [44, {"price": 666, "currency": "tulip bulbs"}],
+                    },
+                ],
             },
-            """\
+            "_id": "123kthxbye",
+        },
+        """\
             {
               "query": "get stuff",
               "results": {
@@ -213,28 +245,28 @@ def test_dumps_listings(max_width, obj, expected):
               },
               "_id": "123kthxbye"
             }""",  # noqa: E501
-        ),
-        (
-            80,
-            {
-                "a": {
-                    "bb": {
-                        "ccc": {
-                            "dddd": {
-                                "eeeee": {
-                                    "ffffff": "foo",
-                                },
-                            }
-                        },
-                        "CCC": {
-                            "D": 13,
-                            "DD": 133,
-                            "DDD": 1333,
-                        },
-                    }
+    ),
+    (
+        80,
+        {
+            "a": {
+                "bb": {
+                    "ccc": {
+                        "dddd": {
+                            "eeeee": {
+                                "ffffff": "foo",
+                            },
+                        }
+                    },
+                    "CCC": {
+                        "D": 13,
+                        "DD": 133,
+                        "DDD": 1333,
+                    },
                 }
-            },
-            """\
+            }
+        },
+        """\
             {
               "a": {
                 "bb": {
@@ -243,50 +275,50 @@ def test_dumps_listings(max_width, obj, expected):
                 }
               }
             }""",
-        ),
-        (
-            120,
-            {
-                "a": {
-                    "bb": {
-                        "ccc": {
-                            "dddd": {
-                                "eeeee": {
-                                    "ffffff": "foo",
-                                },
-                            }
-                        },
-                        "CCC": {
-                            "D": 13,
-                            "DD": 133,
-                            "DDD": 1333,
-                        },
-                    }
+    ),
+    (
+        120,
+        {
+            "a": {
+                "bb": {
+                    "ccc": {
+                        "dddd": {
+                            "eeeee": {
+                                "ffffff": "foo",
+                            },
+                        }
+                    },
+                    "CCC": {
+                        "D": 13,
+                        "DD": 133,
+                        "DDD": 1333,
+                    },
                 }
-            },
-            '{"a": {"bb": {"ccc": {"dddd": {"eeeee": {"ffffff": "foo"}}}, "CCC": {"D": 13, "DD": 133, "DDD": 1333}}}}',  # noqa: E501
-        ),
-        (
-            40,
-            {
-                "a": {
-                    "bb": {
-                        "ccc": {
-                            "dddd": {
-                                "eeeee": {
-                                    "ffffff": "foo",
-                                },
-                            }
-                        },
-                        "CCC": {
-                            "D": 13,
-                            "DD": 133,
-                            "DDD": 1333,
-                        },
-                    }
+            }
+        },
+        '{"a": {"bb": {"ccc": {"dddd": {"eeeee": {"ffffff": "foo"}}}, "CCC": {"D": 13, "DD": 133, "DDD": 1333}}}}',  # noqa: E501
+    ),
+    (
+        40,
+        {
+            "a": {
+                "bb": {
+                    "ccc": {
+                        "dddd": {
+                            "eeeee": {
+                                "ffffff": "foo",
+                            },
+                        }
+                    },
+                    "CCC": {
+                        "D": 13,
+                        "DD": 133,
+                        "DDD": 1333,
+                    },
                 }
-            },
-            """\
+            }
+        },
+        """\
             {
               "a": {
                 "bb": {
@@ -303,12 +335,29 @@ def test_dumps_listings(max_width, obj, expected):
                 }
               }
             }""",
-        ),
-    ],
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ["max_width", "obj", "expected"],
+    DUMP_CASES_NESTED,
 )
-def test_dumps_deep_nesting(obj, max_width, expected):
+def test_dumps_nested(max_width, obj, expected):
     expected = textwrap.dedent(expected)
     assert dumps(obj, max_width=max_width) == expected
+
+
+@pytest.mark.parametrize(
+    ["max_width", "obj", "expected"],
+    DUMP_CASES_NESTED,
+)
+def test_dump_nested(tmp_path, max_width, obj, expected):
+    expected = textwrap.dedent(expected)
+    path = tmp_path / "result.json"
+    with path.open("w") as f:
+        dump(obj, f, max_width=max_width)
+    assert path.read_text() == expected + "\n"
 
 
 class TrackingIterator:

@@ -1,7 +1,13 @@
 import argparse
 import json
+import sys
 
-from jsonreflow.reflow import INDENT_DEFAULT, MAX_WIDTH_DEFAULT, dumps, reflow_iter
+from jsonreflow.reflow import (
+    INDENT_DEFAULT,
+    MAX_WIDTH_DEFAULT,
+    dump,
+    reflow_iter,
+)
 
 
 def main():
@@ -45,15 +51,16 @@ def main():
     )
 
     args = cli.parse_args()
+
     if args.assume_formatted:
         for line in reflow_iter(
-            (s.rstrip() for s in args.input.readlines()), max_width=args.max_width
+            lines=(s.rstrip() for s in args.input.readlines()),
+            max_width=args.max_width,
         ):
             print(line)
     else:
         data = json.load(args.input)
-        # TODO: integrate with streaming JSON encoding
-        print(dumps(data, max_width=args.max_width, indent=args.indent))
+        dump(obj=data, fp=sys.stdout, max_width=args.max_width, indent=args.indent)
 
 
 if __name__ == "__main__":
