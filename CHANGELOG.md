@@ -1,8 +1,10 @@
 
 # Changelog
 
+## WIP: 0.7.0
 
-## WIP: 0.6.0
+
+## 0.6.0 - 2026-06-04
 
 - Add `jsonreflow.dump(obj, fp)` ([#7](https://github.com/soxofaan/jsonreflow/issues/7))
 - Support in-place file modification with CLI argument `--inplace` ([#2](https://github.com/soxofaan/jsonreflow/issues/2))
