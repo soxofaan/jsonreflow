@@ -1,13 +1,8 @@
 import argparse
-import contextlib
-import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 
-import jsonreflow
-from jsonreflow.reflow import INDENT_DEFAULT, MAX_WIDTH_DEFAULT
+from jsonreflow.reflow import INDENT_DEFAULT, MAX_WIDTH_DEFAULT, reflow_file
 
 _STDIN_NAME = "-"
 
@@ -63,68 +58,28 @@ def main():
 
     # Handle input source
     if args.input == _STDIN_NAME:
-        input_context = contextlib.nullcontext(sys.stdin)
+        input = sys.stdin
     else:
-        input_path = Path(args.input)
-        if not input_path.is_file():
+        input = Path(args.input)
+        if not input.is_file():
             # TODO: cleaner CLI error reporting than raw exception
-            raise ValueError(f"Input path {input_path} is not a file")
-        input_context = input_path.open(mode="r", encoding="utf-8")
+            raise ValueError(f"Input path {input} is not a file")
 
     # Handle output destination
     if args.inplace:
         if args.input == _STDIN_NAME:
             raise ValueError("In-place modifying standard input does not make sense.")
-        output_context = _temp_sink_and_rename_on_exit(path=Path(args.input))
+        output = Path(args.input)
     else:
-        output_context = contextlib.nullcontext(sys.stdout)
+        output = sys.stdout
 
-    with output_context as output_file, input_context as input_file:
-        if args.assume_formatted:
-            for line in jsonreflow.reflow_iter(
-                lines=(s.rstrip() for s in input_file.readlines()),
-                max_width=args.max_width,
-            ):
-                output_file.write(line + "\n")
-        else:
-            data = json.load(fp=input_file)
-            jsonreflow.dump(
-                obj=data, fp=output_file, max_width=args.max_width, indent=args.indent
-            )
-
-
-@contextlib.contextmanager
-def _temp_sink_and_rename_on_exit(
-    path: Path, *, mode: str = "w", encoding: str = "utf-8"
-):
-    """
-    Context manager for safe in-place writing of a file
-    (avoid truncating the original file too early):
-    use a temporary file during writing,
-    and atomically replace the target path on successful exit of the context manager.
-    """
-
-    # Use temp file in same directory (file system) to allow atomic move
-    folder = path.parent
-
-    with tempfile.NamedTemporaryFile(
-        mode=mode,
-        encoding=encoding,
-        prefix=".jsonreflow_tmp_",
-        dir=folder,
-        delete=False,
-    ) as temp_file:
-        try:
-            yield temp_file
-            temp_file.flush()
-            temp_file.close()
-            # Rename to target path (should be atomic move)
-            os.replace(src=temp_file.name, dst=path)
-        except Exception:
-            # Clean up temp file on error
-            with contextlib.suppress(FileNotFoundError):
-                os.remove(temp_file.name)
-            raise
+    reflow_file(
+        input=input,
+        output=output,
+        assume_formatted=args.assume_formatted,
+        max_width=args.max_width,
+        indent=args.indent,
+    )
 
 
 if __name__ == "__main__":

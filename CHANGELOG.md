@@ -3,6 +3,8 @@
 
 ## WIP: 0.7.0
 
+- Add `jsonreflow.reflow_file()` function to reflow a JSON file (given as path or file-like object)
+
 
 ## 0.6.0 - 2026-06-04
 

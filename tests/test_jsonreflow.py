@@ -1,10 +1,13 @@
 import json
 import textwrap
+from io import StringIO
+from pathlib import Path
 from typing import Iterable, List
 
 import pytest
 
 from jsonreflow import dump, dumps, reflow_iter
+from jsonreflow.reflow import reflow_file
 
 # Simple cases (obj, expected) of scalar values or small structures
 DUMP_CASES_SIMPLE = [
@@ -546,3 +549,89 @@ def test_reflow_iter_flushing_nested():
     with pytest.raises(StopIteration):
         _ = next(folded)
     assert input_lines.new_consumed() == []
+
+
+@pytest.mark.parametrize(
+    ["max_width", "obj", "expected"],
+    DUMP_CASES_NESTED,
+)
+@pytest.mark.parametrize(
+    ["input_path_type", "output_path_type"],
+    [
+        (str, str),
+        (str, Path),
+        (Path, str),
+        (Path, Path),
+    ],
+)
+def test_reflow_file_with_paths(
+    tmp_path, input_path_type, output_path_type, max_width, obj, expected
+):
+    input_path = tmp_path / "input.json"
+    output_path = tmp_path / "output.json"
+
+    input_path.write_text(json.dumps(obj, indent=2))
+
+    reflow_file(
+        input=input_path_type(input_path),
+        output=output_path_type(output_path),
+        max_width=max_width,
+        indent=2,
+    )
+
+    expected = textwrap.dedent(expected)
+    assert output_path.read_text() == expected + "\n"
+
+
+@pytest.mark.parametrize(
+    ["max_width", "obj", "expected"],
+    DUMP_CASES_NESTED,
+)
+@pytest.mark.parametrize(
+    ["input_path_type", "output_path_type"],
+    [
+        (str, str),
+        (str, Path),
+        (str, None),
+        (Path, str),
+        (Path, Path),
+        (Path, None),
+    ],
+)
+def test_reflow_file_with_paths_and_inplace_mode(
+    tmp_path, input_path_type, output_path_type, max_width, obj, expected
+):
+    path = tmp_path / "data.json"
+    path.write_text(json.dumps(obj, indent=2))
+
+    reflow_file(
+        input=input_path_type(path),
+        output=(
+            # Implicit or explicit in-place output?
+            output_path_type(path) if output_path_type is not None else None
+        ),
+        max_width=max_width,
+        indent=2,
+    )
+
+    expected = textwrap.dedent(expected)
+    assert path.read_text() == expected + "\n"
+
+
+@pytest.mark.parametrize(
+    ["max_width", "obj", "expected"],
+    DUMP_CASES_NESTED,
+)
+def test_reflow_file_with_stringio(max_width, obj, expected):
+
+    input = StringIO(json.dumps(obj, indent=2))
+    output = StringIO()
+    reflow_file(
+        input=input,
+        output=output,
+        max_width=max_width,
+        indent=2,
+    )
+
+    expected = textwrap.dedent(expected)
+    assert output.getvalue() == expected + "\n"
