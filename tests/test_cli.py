@@ -182,7 +182,7 @@ def test_inplace_nonexistent_file(tmp_path: Path):
     assert result.returncode != 0
     assert result.stdout == ""
     # TODO: check for cleaner error message #4
-    assert "nonexistent.json is not a file" in result.stderr
+    assert "nonexistent.json is not a valid file" in result.stderr
 
     assert path.exists() is False
 
