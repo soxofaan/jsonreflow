@@ -1,11 +1,11 @@
 
 # JSON Reflow
 
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jsonreflow)
-![PyPI - Wheel](https://img.shields.io/pypi/wheel/jsonreflow)
-![PyPI - Version](https://img.shields.io/pypi/v/jsonreflow)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/soxofaan/jsonreflow/unittests.yml)
-![PyPI - License](https://img.shields.io/pypi/l/jsonreflow)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jsonreflow)](https://pypi.org/project/jsonreflow/)
+[![PyPI - Wheel](https://img.shields.io/pypi/wheel/jsonreflow)](https://pypi.org/project/jsonreflow/)
+[![PyPI - Version](https://img.shields.io/pypi/v/jsonreflow)](https://pypi.org/project/jsonreflow/)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/soxofaan/jsonreflow/unittests.yml)](https://github.com/soxofaan/jsonreflow/actions/workflows/unittests.yml)
+[![PyPI - License](https://img.shields.io/pypi/l/jsonreflow)](https://github.com/soxofaan/jsonreflow/blob/main/LICENSE.txt)
 
 
 Python library and CLI tool to reflow JSON files and streams,
