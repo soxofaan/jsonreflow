@@ -549,12 +549,112 @@ def test_reflow_iter_flushing_nested():
     assert input_lines.new_consumed() == []
 
 
+# Reusable use cases for reflow_file, with fields:
+# ["max_width", "indent", "assume_formatted", "content", "expected"]
+REFLOW_FILE_CASES = [
+    (
+        80,
+        2,
+        False,
+        '{"five": [0, 1, 2, 3, 4], "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}',
+        '{"five": [0, 1, 2, 3, 4], "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}',
+    ),
+    (
+        40,
+        2,
+        False,
+        '{"five": [0, 1, 2, 3, 4], "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}',
+        textwrap.dedent("""\
+            {
+              "five": [0, 1, 2, 3, 4],
+              "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            }"""),
+    ),
+    (
+        30,
+        2,
+        False,
+        '{"five": [0, 1, 2, 3, 4], "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}',
+        textwrap.dedent("""\
+            {
+              "five": [0, 1, 2, 3, 4],
+              "ten": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ]
+            }"""),
+    ),
+    (
+        32,
+        8,
+        False,
+        '{"five": [0, 1, 2, 3, 4], "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}',
+        textwrap.dedent("""\
+            {
+                    "five": [0, 1, 2, 3, 4],
+                    "ten": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                    ]
+            }"""),
+    ),
+    (
+        80,
+        2,
+        True,
+        textwrap.dedent("""\
+            {
+            "a": 123 + stuff,
+            "b": [
+                look ma,
+                no quotes
+            ]
+            }"""),
+        '{"a": 123 + stuff, "b": [look ma, no quotes]}',
+    ),
+    (
+        40,
+        2,
+        True,
+        textwrap.dedent("""\
+            {
+            "a": 123 + stuff,
+            "b": [
+                look ma,
+                no quotes
+            ]
+            }"""),
+        textwrap.dedent("""\
+            {
+            "a": 123 + stuff,
+            "b": [look ma, no quotes]
+            }"""),
+    ),
+]
+
+
 @pytest.mark.parametrize(
-    ["max_width", "obj", "expected"],
-    DUMP_CASES_NESTED,
+    ["max_width", "indent", "assume_formatted", "content", "expected"],
+    REFLOW_FILE_CASES,
 )
 @pytest.mark.parametrize(
-    ["input_path_type", "output_path_type"],
+    ["source_path_type", "sink_path_type"],
     [
         (str, str),
         (str, Path),
@@ -563,28 +663,36 @@ def test_reflow_iter_flushing_nested():
     ],
 )
 def test_reflow_file_with_paths(
-    tmp_path, input_path_type, output_path_type, max_width, obj, expected
+    tmp_path,
+    source_path_type,
+    sink_path_type,
+    max_width,
+    indent,
+    assume_formatted,
+    content,
+    expected,
 ):
-    input_path = tmp_path / "input.json"
-    output_path = tmp_path / "output.json"
-    input_path.write_text(json.dumps(obj, indent=2))
+    source_path = tmp_path / "input.json"
+    sink_path = tmp_path / "output.json"
+    source_path.write_text(content)
 
     reflow_file(
-        input=input_path_type(input_path),
-        output=output_path_type(output_path),
+        source=source_path_type(source_path),
+        sink=sink_path_type(sink_path),
         max_width=max_width,
-        indent=2,
+        indent=indent,
+        assume_formatted=assume_formatted,
     )
 
-    assert output_path.read_text() == expected + "\n"
+    assert sink_path.read_text() == expected + "\n"
 
 
 @pytest.mark.parametrize(
-    ["max_width", "obj", "expected"],
-    DUMP_CASES_NESTED,
+    ["max_width", "indent", "assume_formatted", "content", "expected"],
+    REFLOW_FILE_CASES,
 )
 @pytest.mark.parametrize(
-    ["input_path_type", "output_path_type"],
+    ["source_path_type", "sink_path_type"],
     [
         (str, str),
         (str, Path),
@@ -595,33 +703,44 @@ def test_reflow_file_with_paths(
     ],
 )
 def test_reflow_file_with_paths_and_inplace_mode(
-    tmp_path, input_path_type, output_path_type, max_width, obj, expected
+    tmp_path,
+    source_path_type,
+    sink_path_type,
+    max_width,
+    indent,
+    assume_formatted,
+    content,
+    expected,
 ):
     path = tmp_path / "data.json"
-    path.write_text(json.dumps(obj, indent=2))
+    path.write_text(content)
     reflow_file(
-        input=input_path_type(path),
-        output=(
+        source=source_path_type(path),
+        sink=(
             # Implicit or explicit in-place output?
-            output_path_type(path) if output_path_type is not None else None
+            sink_path_type(path) if sink_path_type is not None else None
         ),
         max_width=max_width,
-        indent=2,
+        indent=indent,
+        assume_formatted=assume_formatted,
     )
     assert path.read_text() == expected + "\n"
 
 
 @pytest.mark.parametrize(
-    ["max_width", "obj", "expected"],
-    DUMP_CASES_NESTED,
+    ["max_width", "indent", "assume_formatted", "content", "expected"],
+    REFLOW_FILE_CASES,
 )
-def test_reflow_file_with_stringio(max_width, obj, expected):
-    input = StringIO(json.dumps(obj, indent=2))
-    output = StringIO()
+def test_reflow_file_with_stringio(
+    max_width, indent, assume_formatted, content, expected
+):
+    source = StringIO(content)
+    sink = StringIO()
     reflow_file(
-        input=input,
-        output=output,
+        source=source,
+        sink=sink,
         max_width=max_width,
-        indent=2,
+        indent=indent,
+        assume_formatted=assume_formatted,
     )
-    assert output.getvalue() == expected + "\n"
+    assert sink.getvalue() == expected + "\n"

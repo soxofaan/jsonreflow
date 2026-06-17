@@ -58,24 +58,24 @@ def main():
 
     # Handle input source
     if args.input == _STDIN_NAME:
-        input = sys.stdin
+        source = sys.stdin
     else:
-        input = Path(args.input)
-        if not input.is_file():
+        source = Path(args.input)
+        if not source.is_file():
             # TODO: cleaner CLI error reporting than raw exception
-            raise ValueError(f"Input path {input} is not a file")
+            raise ValueError(f"Input path {source} is not a valid file")
 
     # Handle output destination
     if args.inplace:
         if args.input == _STDIN_NAME:
             raise ValueError("In-place modifying standard input does not make sense.")
-        output = Path(args.input)
+        sink = Path(args.input)
     else:
-        output = sys.stdout
+        sink = sys.stdout
 
     reflow_file(
-        input=input,
-        output=output,
+        source=source,
+        sink=sink,
         assume_formatted=args.assume_formatted,
         max_width=args.max_width,
         indent=args.indent,

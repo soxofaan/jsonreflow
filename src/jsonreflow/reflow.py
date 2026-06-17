@@ -10,7 +10,7 @@ INDENT_DEFAULT = 2
 
 
 class SupportsRead(Protocol):
-    def read(self, size: int = ..., /) -> str: ...
+    def read(self, size: int = -1, /) -> str: ...
     def readlines(self) -> Iterable[str]: ...
 
 
@@ -186,39 +186,40 @@ def _temp_sink_and_rename_on_exit(
 
 
 def reflow_file(
-    input: Union[str, Path, SupportsRead],
-    output: Union[str, Path, SupportsWrite, None],
+    source: Union[str, Path, SupportsRead],
+    sink: Union[str, Path, SupportsWrite, None],
     *,
-    assume_formatted: bool = False,
     max_width: int = MAX_WIDTH_DEFAULT,
     indent: int = INDENT_DEFAULT,
+    assume_formatted: bool = False,
 ) -> None:
     """
     Reflow JSON from the given file and write back in-place
     or write to another file.
     """
-    if isinstance(input, (str, Path)):
-        input_context = Path(input).open(mode="r", encoding="utf-8")  # noqa: SIM115
+    if isinstance(source, (str, Path)):
+        source_context = Path(source).open(mode="r", encoding="utf-8")  # noqa: SIM115
     else:
         # Assume it's already a readable file-like object
-        input_context = contextlib.nullcontext(input)
+        source_context = contextlib.nullcontext(source)
 
-    if output is None:
+    if sink is None:
         # In-place mode
-        assert isinstance(input, (str, Path))
-        output_context = _temp_sink_and_rename_on_exit(path=Path(input))
-    elif isinstance(output, (str, Path)):
-        output_context = _temp_sink_and_rename_on_exit(path=Path(output))
+        if not isinstance(source, (str, Path)):
+            raise ValueError(f"In-place mode requires a file path, but got {source=}.")
+        sink_context = _temp_sink_and_rename_on_exit(path=Path(source))
+    elif isinstance(sink, (str, Path)):
+        sink_context = _temp_sink_and_rename_on_exit(path=Path(sink))
     else:
         # Assume it's already a writable file-like object
-        output_context = contextlib.nullcontext(output)
+        sink_context = contextlib.nullcontext(sink)
 
-    with output_context as output_file, input_context as input_file:
+    with sink_context as sink_file, source_context as source_file:
         if assume_formatted:
-            encoded_lines = (s.rstrip() for s in input_file.readlines())
+            encoded_lines = (s.rstrip() for s in source_file.readlines())
         else:
-            data = json.load(fp=input_file)
+            data = json.load(fp=source_file)
             encoded_lines = _json_encode_lines(obj=data, indent=indent)
 
         for line in reflow_iter(lines=encoded_lines, max_width=max_width):
-            output_file.write(line + "\n")
+            sink_file.write(line + "\n")
