@@ -115,16 +115,16 @@ DUMP_CASES_NESTED = [
     (
         40,
         {"five": list(range(5)), "ten": list(range(10))},
-        """\
+        textwrap.dedent("""\
             {
               "five": [0, 1, 2, 3, 4],
               "ten": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-            }""",
+            }"""),
     ),
     (
         30,
         {"five": list(range(5)), "ten": list(range(10))},
-        """\
+        textwrap.dedent("""\
             {
               "five": [0, 1, 2, 3, 4],
               "ten": [
@@ -139,7 +139,7 @@ DUMP_CASES_NESTED = [
                 8,
                 9
               ]
-            }""",
+            }"""),
     ),
     (
         80,
@@ -149,14 +149,14 @@ DUMP_CASES_NESTED = [
     (
         40,
         {str(x): chr(97 + x) * x for x in range(5)},
-        """\
+        textwrap.dedent("""\
             {
               "0": "",
               "1": "b",
               "2": "cc",
               "3": "ddd",
               "4": "eeee"
-            }""",
+            }"""),
     ),
     (
         80,
@@ -183,7 +183,7 @@ DUMP_CASES_NESTED = [
             },
             "_id": "123kthxbye",
         },
-        """\
+        textwrap.dedent("""\
             {
               "query": "get stuff",
               "results": {
@@ -206,7 +206,7 @@ DUMP_CASES_NESTED = [
                 ]
               },
               "_id": "123kthxbye"
-            }""",
+            }"""),
     ),
     (
         120,
@@ -233,7 +233,7 @@ DUMP_CASES_NESTED = [
             },
             "_id": "123kthxbye",
         },
-        """\
+        textwrap.dedent("""\
             {
               "query": "get stuff",
               "results": {
@@ -247,7 +247,7 @@ DUMP_CASES_NESTED = [
                 ]
               },
               "_id": "123kthxbye"
-            }""",  # noqa: E501
+            }"""),  # noqa: E501
     ),
     (
         80,
@@ -269,7 +269,7 @@ DUMP_CASES_NESTED = [
                 }
             }
         },
-        """\
+        textwrap.dedent("""\
             {
               "a": {
                 "bb": {
@@ -277,7 +277,7 @@ DUMP_CASES_NESTED = [
                   "CCC": {"D": 13, "DD": 133, "DDD": 1333}
                 }
               }
-            }""",
+            }"""),
     ),
     (
         120,
@@ -321,7 +321,7 @@ DUMP_CASES_NESTED = [
                 }
             }
         },
-        """\
+        textwrap.dedent("""\
             {
               "a": {
                 "bb": {
@@ -337,7 +337,7 @@ DUMP_CASES_NESTED = [
                   }
                 }
               }
-            }""",
+            }"""),
     ),
 ]
 
@@ -347,7 +347,6 @@ DUMP_CASES_NESTED = [
     DUMP_CASES_NESTED,
 )
 def test_dumps_nested(max_width, obj, expected):
-    expected = textwrap.dedent(expected)
     assert dumps(obj, max_width=max_width) == expected
 
 
@@ -356,7 +355,6 @@ def test_dumps_nested(max_width, obj, expected):
     DUMP_CASES_NESTED,
 )
 def test_dump_nested(tmp_path, max_width, obj, expected):
-    expected = textwrap.dedent(expected)
     path = tmp_path / "result.json"
     with path.open("w") as f:
         dump(obj, f, max_width=max_width)
@@ -569,7 +567,6 @@ def test_reflow_file_with_paths(
 ):
     input_path = tmp_path / "input.json"
     output_path = tmp_path / "output.json"
-
     input_path.write_text(json.dumps(obj, indent=2))
 
     reflow_file(
@@ -579,7 +576,6 @@ def test_reflow_file_with_paths(
         indent=2,
     )
 
-    expected = textwrap.dedent(expected)
     assert output_path.read_text() == expected + "\n"
 
 
@@ -603,7 +599,6 @@ def test_reflow_file_with_paths_and_inplace_mode(
 ):
     path = tmp_path / "data.json"
     path.write_text(json.dumps(obj, indent=2))
-
     reflow_file(
         input=input_path_type(path),
         output=(
@@ -613,8 +608,6 @@ def test_reflow_file_with_paths_and_inplace_mode(
         max_width=max_width,
         indent=2,
     )
-
-    expected = textwrap.dedent(expected)
     assert path.read_text() == expected + "\n"
 
 
@@ -623,7 +616,6 @@ def test_reflow_file_with_paths_and_inplace_mode(
     DUMP_CASES_NESTED,
 )
 def test_reflow_file_with_stringio(max_width, obj, expected):
-
     input = StringIO(json.dumps(obj, indent=2))
     output = StringIO()
     reflow_file(
@@ -632,6 +624,4 @@ def test_reflow_file_with_stringio(max_width, obj, expected):
         max_width=max_width,
         indent=2,
     )
-
-    expected = textwrap.dedent(expected)
     assert output.getvalue() == expected + "\n"
