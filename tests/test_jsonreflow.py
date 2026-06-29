@@ -6,8 +6,7 @@ from typing import Iterable, List
 
 import pytest
 
-from jsonreflow import dump, dumps, reflow_iter
-from jsonreflow.reflow import reflow_file
+from jsonreflow import dump, dumps, reflow_file, reflow_iter
 
 # Simple cases (obj, expected) of scalar values or small structures
 DUMP_CASES_SIMPLE = [

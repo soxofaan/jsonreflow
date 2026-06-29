@@ -2,7 +2,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from jsonreflow.reflow import INDENT_DEFAULT, MAX_WIDTH_DEFAULT, reflow_file
+from jsonreflow._reflow import INDENT_DEFAULT, MAX_WIDTH_DEFAULT, reflow_file
 
 _STDIN_NAME = "-"
 

@@ -1,4 +1,4 @@
-from jsonreflow.reflow import dump, dumps, reflow, reflow_file, reflow_iter
+from jsonreflow._reflow import dump, dumps, reflow, reflow_file, reflow_iter
 
 __version__ = "0.7.0"
 
