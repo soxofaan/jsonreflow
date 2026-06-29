@@ -1,7 +1,10 @@
 
 # Changelog
 
-## WIP: 0.8.0
+
+## WIP 0.7.1
+
+- Fix importability of `jsonreflow.reflow_file` ([#11](https://github.com/soxofaan/jsonreflow/issues/11), [#13](https://github.com/soxofaan/jsonreflow/issues/13))
 
 
 ## 0.7.0 - 2026-06-17
