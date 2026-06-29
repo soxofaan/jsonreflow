@@ -187,7 +187,7 @@ def _temp_sink_and_rename_on_exit(
 
 def reflow_file(
     source: Union[str, Path, SupportsRead],
-    sink: Union[str, Path, SupportsWrite, None],
+    sink: Union[str, Path, SupportsWrite, None] = None,
     *,
     max_width: int = MAX_WIDTH_DEFAULT,
     indent: int = INDENT_DEFAULT,
