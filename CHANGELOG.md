@@ -4,6 +4,7 @@
 
 ## WIP 0.7.1
 
+- `reflow_file()`: give `sink` argument default value `None` to make in-place reflowing easier
 - Fix importability of `jsonreflow.reflow_file` ([#11](https://github.com/soxofaan/jsonreflow/issues/11), [#13](https://github.com/soxofaan/jsonreflow/issues/13))
 
 
