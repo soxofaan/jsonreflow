@@ -5,56 +5,45 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>JSON reflow demo</title>
+    <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="https://pyscript.net/releases/2026.6.2/core.css" />
     <script type="module" src="https://pyscript.net/releases/2026.6.2/core.js"></script>
 </head>
 
 <body>
-    <h1>JSON reflow demo</h1>
 
-    <textarea id="input-json">
-{
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              3.260,
-              50.82
-            ],
-            [
-              3.83,
-              50.92
-            ],
-            [
-              3.97,
-              51.24
-            ],
-            [
-              3.55,
-              51.11
-            ],
-            [
-              3.26,
-              50.82
-            ]
-          ]
-        ]
-      },
-      "properties": {
-        "color": "green"
-      }
-    }
-  ]
-}
-    </textarea>
-    <textarea id="output-json" readonly></textarea>
+    <div id="header">
+        <h1>
+            <a href="https://github.com/soxofaan/jsonreflow">JSON Reflow</a> demo
+        </h1>
+    </div>
 
-    <button id="reflow-button">Reflow</button>
+    <div id="toolbar">
+        <button id="reflow-button">Reflow</button>
+    </div>
+
+    <div id="text-panes">
+        <div class="text-pane">
+            <div class="pane-title">
+                Input JSON:
+            </div>
+            <textarea id="input-json"></textarea>
+        </div>
+
+        <div class="text-pane">
+            <div class="pane-title">
+                Reflowed JSON:
+            </div>
+            <textarea id="output-json" readonly></textarea>
+        </div>
+    </div>
+
+    <div id="about">
+        🐍
+        Powered by Python package <a href="https://github.com/soxofaan/jsonreflow">jsonreflow</a>
+        <span class="jsonreflow-version"></span>.
+        Running in the browser using <a href="https://pyscript.net">PyScript</a>.
+    </div>
 
     <script type="py" config="./pyscript-config.json" src="./main.py"></script>
 </body>
