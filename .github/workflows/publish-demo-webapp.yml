@@ -1,4 +1,4 @@
-name: Puplish demo webapp
+name: Publish demo webapp
 
 on:
   push:
