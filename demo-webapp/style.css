@@ -61,6 +61,11 @@ h1 {
 .pane-title {
 }
 
+.pane-stats {
+    color: #777;
+    font-size: 85%;
+}
+
 .text-pane textarea {
     flex: 1;
     min-height: 200px;

@@ -30,8 +30,26 @@ for el in web.page.find(".jsonreflow-version"):
     el.innerText = jsonreflow.__version__
 
 
+def update_stats(text_id: str, stats_id: str) -> None:
+    text = web.page[text_id].value
+    lines = text.split("\n")
+    longest_line = max((len(line) for line in lines), default=0)
+    web.page[
+        stats_id
+    ].innerText = (
+        f"({len(text)} chars, {len(lines)} lines, longest line: {longest_line} chars)"
+    )
+
+
 web.page["input-json"].value = json.dumps(EXAMPLE_DATA, indent=2)
 web.page["output-json"].value = jsonreflow.dumps(EXAMPLE_DATA, indent=2)
+update_stats(text_id="input-json", stats_id="input-stats")
+update_stats(text_id="output-json", stats_id="output-stats")
+
+
+@when("input", "#input-json")
+def input_changed(event):
+    update_stats(text_id="input-json", stats_id="input-stats")
 
 
 @when("click", "#reflow-button")
@@ -45,3 +63,4 @@ def reflow(event):
     output_json = jsonreflow.dumps(data, indent=indent, max_width=max_width)
 
     web.page["output-json"].value = output_json
+    update_stats(text_id="output-json", stats_id="output-stats")
