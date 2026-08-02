@@ -37,9 +37,10 @@ web.page["output-json"].value = jsonreflow.dumps(EXAMPLE_DATA, indent=2)
 @when("click", "#reflow-button")
 def reflow(event):
     input_json = web.page["input-json"].value
+    indent = int(web.page["indent-select"].value)
 
     # output_json = jsonreflow.reflow(input_json)
     data = json.loads(input_json)
-    output_json = jsonreflow.dumps(data, indent=2)
+    output_json = jsonreflow.dumps(data, indent=indent)
 
     web.page["output-json"].value = output_json
