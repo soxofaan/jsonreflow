@@ -75,6 +75,26 @@ h1 {
     border: 0px solid transparent;
 }
 
+#output-pane.error {
+    border-color: #f88;
+}
+
+#output-pane.error #output-json {
+    color: #ccc;
+}
+
+#output-error {
+    display: none;
+}
+
+#output-pane.error #output-error{
+    display: block;
+    background-color: #faa;
+    border: 1px solid #f88;
+    padding: 8px;
+    border-radius: 8px;
+}
+
 #about {
     color: #333;
     font-size: 85%;

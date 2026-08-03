@@ -58,9 +58,25 @@ def reflow(event):
     indent = int(web.page["indent-select"].value)
     max_width = int(web.page["max-width-select"].value)
 
-    # output_json = jsonreflow.reflow(input_json)
-    data = json.loads(input_json)
-    output_json = jsonreflow.dumps(data, indent=indent, max_width=max_width)
+    try:
+        data = json.loads(input_json)
+        output_json = jsonreflow.dumps(data, indent=indent, max_width=max_width)
+    except Exception as e:
+        set_output_error(repr(e))
+        return
 
+    set_output_error(None)
     web.page["output-json"].value = output_json
     update_stats(text_id="output-json", stats_id="output-stats")
+
+
+def set_output_error(message: str | None):
+    output_error_element = web.page["output-error"]
+    output_pane_element = web.page["output-pane"]
+
+    if message:
+        output_error_element.innerText = message
+        output_pane_element.classes.add("error")
+    else:
+        output_error_element.innerText = ""
+        output_pane_element.classes.remove("error")
