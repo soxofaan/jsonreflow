@@ -42,14 +42,17 @@
     <div id="text-panes">
         <div class="text-pane" id="input-pane">
             <div class="pane-title">
-                Input JSON <span id="input-stats" class="pane-stats"></span>
+                Input JSON
+                <span id="input-stats" class="pane-stats"></span>
             </div>
             <textarea id="input-json">loading ...</textarea>
         </div>
 
         <div class="text-pane" id="output-pane">
             <div class="pane-title">
-                Reflowed JSON <span id="output-stats" class="pane-stats"></span>
+                Reflowed JSON
+                <span id="output-stats" class="pane-stats"></span>
+                <button id="copy-output-button" type="button" class="pane-action-button" title="Copy reflowed JSON to clipboard" disabled>Copy</button>
             </div>
             <div id="output-error"></div>
             <textarea id="output-json" readonly>loading ...</textarea>

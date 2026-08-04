@@ -2,7 +2,7 @@ import asyncio
 import json
 from typing import Callable
 
-from pyscript import web, when
+from pyscript import web, when, window
 
 import jsonreflow
 
@@ -50,11 +50,13 @@ def do_reflow():
         output_json = jsonreflow.dumps(data, indent=indent, max_width=max_width)
     except Exception as e:
         set_output_error(repr(e))
+        web.page["copy-output-button"].disabled = True
         return
 
     set_output_error(None)
     web.page["output-json"].value = output_json
     update_stats(text_id="output-json", stats_id="output-stats")
+    web.page["copy-output-button"].disabled = False
 
 
 class Debouncer:
@@ -91,6 +93,18 @@ def input_changed(event):
 @when("change", "#max-width-select")
 def option_changed(event):
     do_reflow()
+
+
+@when("click", "#copy-output-button")
+async def copy_output(event):
+    button = web.page["copy-output-button"]
+    try:
+        await window.navigator.clipboard.writeText(web.page["output-json"].value)
+        button.innerText = "Copied!"
+    except Exception:
+        button.innerText = "Failed to copy"
+    await asyncio.sleep(2)
+    button.innerText = "Copy"
 
 
 def update_stats(text_id: str, stats_id: str) -> None:
