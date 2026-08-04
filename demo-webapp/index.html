@@ -10,13 +10,15 @@
     <script type="module" src="https://pyscript.net/releases/2026.6.2/core.js"></script>
 </head>
 
-<body>
+<body id="app" class="loading">
 
     <div id="header">
         <h1>
             <a href="https://github.com/soxofaan/jsonreflow">JSON Reflow</a> demo
         </h1>
     </div>
+
+    <div id="loading-indicator">Loading ...</div>
 
     <div id="toolbar">
         <div>
@@ -45,7 +47,7 @@
                 Input JSON
                 <span id="input-stats" class="pane-stats"></span>
             </div>
-            <textarea id="input-json">loading ...</textarea>
+            <textarea id="input-json" placeholder="Paste or type JSON here ..."></textarea>
         </div>
 
         <div class="text-pane" id="output-pane">
@@ -55,7 +57,7 @@
                 <button id="copy-output-button" type="button" class="pane-action-button" title="Copy reflowed JSON to clipboard" disabled>Copy</button>
             </div>
             <div id="output-error"></div>
-            <textarea id="output-json" readonly>loading ...</textarea>
+            <textarea id="output-json" readonly placeholder="Reflowed JSON will appear here ..."></textarea>
         </div>
     </div>
 

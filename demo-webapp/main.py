@@ -39,6 +39,9 @@ def init():
     update_stats(text_id="input-json", stats_id="input-stats")
     do_reflow()
 
+    # App is ready: swap the loading indicator for the actual toolbar and panes
+    web.page["app"].classes.remove("loading")
+
 
 def do_reflow():
     input_json = web.page["input-json"].value
