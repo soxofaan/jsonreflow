@@ -1,7 +1,10 @@
 
 # Changelog
 
-## WIP 0.8.0
+## WIP
+
+
+## 0.8.0 - 2026-08-06
 
 - Add `sort_keys` argument to `jsonreflow.dump()` and `jsonreflow.dumps()` ([#20](https://github.com/soxofaan/jsonreflow/issues/20))
 
