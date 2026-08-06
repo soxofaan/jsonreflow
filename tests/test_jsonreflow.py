@@ -360,6 +360,80 @@ def test_dump_nested(tmp_path, max_width, obj, expected):
     assert path.read_text() == expected + "\n"
 
 
+DUMP_CASES_SORT_KEYS = [
+    (
+        False,
+        80,
+        {
+            "lorem": "ipsum",
+            "dolor": {"sit": "amet", "consectetur": "adipiscing"},
+        },
+        '{"lorem": "ipsum", "dolor": {"sit": "amet", "consectetur": "adipiscing"}}',  # noqa: E501
+    ),
+    (
+        False,
+        40,
+        {
+            "lorem": "ipsum",
+            "dolor": {"sit": "amet", "consectetur": "adipiscing"},
+        },
+        textwrap.dedent("""\
+                {
+                  "lorem": "ipsum",
+                  "dolor": {
+                    "sit": "amet",
+                    "consectetur": "adipiscing"
+                  }
+                }"""),
+    ),
+    (
+        True,
+        80,
+        {
+            "lorem": "ipsum",
+            "dolor": {"sit": "amet", "consectetur": "adipiscing"},
+        },
+        '{"dolor": {"consectetur": "adipiscing", "sit": "amet"}, "lorem": "ipsum"}',  # noqa: E501
+    ),
+    (
+        True,
+        40,
+        {
+            "lorem": "ipsum",
+            "dolor": {"sit": "amet", "consectetur": "adipiscing"},
+        },
+        textwrap.dedent("""\
+                {
+                  "dolor": {
+                    "consectetur": "adipiscing",
+                    "sit": "amet"
+                  },
+                  "lorem": "ipsum"
+                }"""),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ["sort_keys", "max_width", "obj", "expected"],
+    DUMP_CASES_SORT_KEYS,
+)
+def test_dumps_sort_keys(sort_keys, max_width, obj, expected):
+    actual = dumps(obj, max_width=max_width, indent=2, sort_keys=sort_keys)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ["sort_keys", "max_width", "obj", "expected"],
+    DUMP_CASES_SORT_KEYS,
+)
+def test_dump_sort_keys(sort_keys, max_width, obj, expected, tmp_path):
+    path = tmp_path / "result.json"
+    with path.open("w") as f:
+        dump(obj, f, max_width=max_width, sort_keys=sort_keys)
+    assert path.read_text() == expected + "\n"
+
+
 class TrackingIterator:
     """
     Wrapper for an iterable of strings, to keep track of what has been consumed already.

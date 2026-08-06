@@ -90,6 +90,7 @@ def dumps(
     *,
     max_width: int = MAX_WIDTH_DEFAULT,
     indent: int = INDENT_DEFAULT,
+    sort_keys: bool = False,
 ) -> str:
     """
     Serialize `obj` to a JSON-formatted string,
@@ -98,7 +99,11 @@ def dumps(
     """
     # TODO: support all/most of the original json.dumps arguments?
     return reflow(
-        encoded=json.dumps(obj=obj, indent=indent),
+        encoded=json.dumps(
+            obj=obj,
+            indent=indent,
+            sort_keys=sort_keys,
+        ),
         max_width=max_width,
     )
 
@@ -120,13 +125,20 @@ def _chunks_to_lines(chunks: Iterable[str]) -> Iterator[str]:
         yield buffer
 
 
-def _json_encode_lines(obj, indent: int = INDENT_DEFAULT) -> Iterator[str]:
+def _json_encode_lines(
+    obj,
+    indent: int = INDENT_DEFAULT,
+    sort_keys: bool = False,
+) -> Iterator[str]:
     """
     Use stdlib json.JSONEncoder to JSON-encode given object
     and produce line per line
     """
     # TODO: support all/most of JSONEncoder's arguments?
-    encoder = json.JSONEncoder(indent=indent)
+    encoder = json.JSONEncoder(
+        indent=indent,
+        sort_keys=sort_keys,
+    )
     chunks = encoder.iterencode(obj)
     yield from _chunks_to_lines(chunks)
 
@@ -137,6 +149,7 @@ def dump(
     *,
     max_width: int = MAX_WIDTH_DEFAULT,
     indent: int = INDENT_DEFAULT,
+    sort_keys: bool = False,
 ) -> None:
     """
     Serialize `obj` as a JSON-formatted stream to `fp`
@@ -145,7 +158,11 @@ def dump(
     but with reflowing to fit within a given line width.
     """
     # TODO: support all/most of JSONEncoder's arguments?
-    encoded_lines = _json_encode_lines(obj=obj, indent=indent)
+    encoded_lines = _json_encode_lines(
+        obj=obj,
+        indent=indent,
+        sort_keys=sort_keys,
+    )
     for line in reflow_iter(lines=encoded_lines, max_width=max_width):
         # TODO: classic json.dump() does not add newline after last line
         fp.write(line + "\n")
