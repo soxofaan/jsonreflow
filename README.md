@@ -8,8 +8,8 @@
 [![PyPI - License](https://img.shields.io/pypi/l/jsonreflow)](https://github.com/soxofaan/jsonreflow/blob/main/LICENSE.txt)
 
 
-Python library and CLI tool to reflow JSON files and streams,
-to allow a better compromise between
+Python library and CLI tool for reflowing JSON files and streams,
+helping to find a better balance between
 
 - **compactness**:
   try to fit short arrays and objects on a single line,
@@ -18,18 +18,17 @@ to allow a better compromise between
   multilevel indentation for larger constructs otherwise.
 
 
+![JSON Reflow](docs/jsonreflow.png)
 
-## The problem
-
-Standard JSON serialization tools typically only provide two approaches:
+Standard JSON serialization tools typically only provide two modes:
 
 - put everything on a **single line**:
-  the most compact, but very poor for human readability
+  the most **compact**, but very poor readability for humans
 
 - spread out each and every array item and object property on its own line
   with appropriate indentation to visualize the structure.
-  This is easier for humans to parse visually
-  (which is why it is often referred to as "*prettifying*" or "*beautifying*"),
+  Often called "*prettifying*" or "*beautifying*"
+  as it makes things easier to parse visually,
   but for larger documents, this easily becomes unwieldy, "**too vertical**"
   and very space-inefficient because of all the repeated indentation.
 
